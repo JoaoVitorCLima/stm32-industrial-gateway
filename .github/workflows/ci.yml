@@ -13,5 +13,7 @@ jobs:
         run: gcc -std=c11 -Wall -Wextra -Werror -Ifirmware/inc tests/test_protocol.c -o test_protocol
       - name: Run protocol tests
         run: ./test_protocol
+      - name: Install static-analysis tools
+        run: sudo apt-get update && sudo apt-get install -y cppcheck
       - name: Static analysis
         run: cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem firmware
