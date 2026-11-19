@@ -1,48 +1,49 @@
 # STM32 Industrial Gateway
 
-Gateway industrial modular para aquisição de dados, diagnóstico e comunicação entre nós embarcados.
+![Status](https://img.shields.io/badge/status-in%20development-orange)
+![Language](https://img.shields.io/badge/language-C%2FC%2B%2B-blue)
+![Platform](https://img.shields.io/badge/platform-STM32-03234B)
+![RTOS](https://img.shields.io/badge/RTOS-FreeRTOS-00A98F)
 
-> Status: arquitetura e firmware de aplicação em desenvolvimento. A camada HAL deve ser ligada ao STM32 escolhido e os resultados de bancada devem ser adicionados às releases.
+Modular embedded gateway for industrial data acquisition, diagnostics, and CAN bus communication.
 
-## Visão do produto
+> **Project status:** The application architecture and host-side tests are implemented. The hardware abstraction layer must be connected to the selected STM32 board before claiming hardware validation.
 
-O dispositivo lê sensores por I2C, publica dados em uma rede CAN e oferece uma CLI de diagnóstico pela UART. A aplicação usa FreeRTOS para separar aquisição, comunicação, supervisão e diagnóstico, com filas entre tarefas e tratamento explícito de falhas.
+## Overview
 
-## Habilidades demonstradas
+The gateway reads sensor data over I2C, publishes measurements through CAN, and provides a UART diagnostic CLI. The firmware is organized with FreeRTOS tasks, explicit fault flags, bounded queues, and a watchdog supervised by a dedicated health task.
 
-- Firmware embarcado em C para STM32
-- FreeRTOS: tasks, filas, mutexes e notificações
-- CAN com protocolo documentado
-- I2C para sensores
-- UART com CLI de diagnóstico
-- Watchdog e tratamento de falhas
-- Organização modular de drivers e aplicação
-- Desenvolvimento de esquemático e PCB
-- Testes automatizados da lógica de protocolo
-- Integração contínua com compilação e análise estática
+This project is designed to demonstrate production-oriented embedded development practices: separation of concerns, documented interfaces, testable application logic, and hardware design planning.
 
-## Arquitetura de software
+## Key features
+
+- STM32 firmware application in C;
+- FreeRTOS tasks, queues, priorities, and watchdog supervision;
+- I2C sensor acquisition;
+- CAN measurement and status frames;
+- UART diagnostic command-line interface;
+- Fault bitmap and runtime status reporting;
+- Hardware abstraction layer isolated from application logic;
+- Documented CAN payloads and scaling rules;
+- Host-side protocol tests;
+- GitHub Actions CI with compiler warnings and static analysis;
+- Custom PCB design plan with manufacturing checklist.
+
+## System architecture
 
 ```text
-Sensor I2C ──> SensorTask ──> DataQueue ──> CanTask ──> Rede CAN
-                                      └──> StorageTask ──> Flash/EEPROM
-UART/CLI ───────────────────────────────> CommandTask
-                         HealthTask ────> Watchdog + diagnóstico
+ I2C sensor ──> SensorTask ──> SampleQueue ──> CanTask ──> CAN network
+                                      │
+                                      └──────> Status / diagnostics
+
+ UART ────────> CommandTask
+
+ HealthTask ──> Fault monitor + watchdog + uptime reporting
 ```
 
-As dependências de hardware ficam atrás de `hal_port.h`. Isso permite testar a lógica da aplicação no computador sem fingir que um periférico foi validado em uma placa real.
+The application depends only on the interfaces in `firmware/hal/hal_port.h`. STM32Cube HAL handles, pin assignments, and peripheral-specific code belong in the HAL implementation, keeping the product logic portable and testable.
 
-## Protocolo CAN
-
-| ID | Direção | Dados |
-|---|---|---|
-| `0x180` | gateway → rede | temperatura `int16`, tensão `uint16`, contador `uint16` |
-| `0x181` | gateway → rede | estado, erros e uptime |
-| `0x200` | rede → gateway | comando e argumento |
-
-Temperatura é enviada em centésimos de grau Celsius e tensão em milivolts.
-
-## CLI UART
+## UART diagnostic CLI
 
 ```text
 help
@@ -54,51 +55,76 @@ config save
 reset
 ```
 
-## Estrutura
+The CLI is intended for service and commissioning. It must not block real-time acquisition or CAN transmission.
+
+## CAN protocol
+
+| CAN ID | Direction | Payload |
+|---|---|---|
+| `0x180` | Gateway → network | Temperature, supply voltage, sample counter |
+| `0x181` | Gateway → network | Fault bitmap and uptime |
+| `0x200` | Network → gateway | Command and argument |
+
+All multi-byte values are little-endian. Temperature is encoded in centi-degrees Celsius and supply voltage in millivolts. The complete payload definition is available in [`docs/can-protocol.md`](docs/can-protocol.md).
+
+## Repository structure
 
 ```text
-firmware/                 Código independente da aplicação
-firmware/inc/             Interfaces públicas
-firmware/src/             Tasks e lógica de aplicação
-firmware/hal/             Pontos de integração com STM32Cube/HAL
-tests/                    Testes da lógica sem hardware
-docs/                     Arquitetura, protocolo e plano de validação
-pcb/                      Esquemático, layout, BOM e arquivos de fabricação
+firmware/inc/       Public application interfaces and configuration
+firmware/src/       FreeRTOS tasks and product logic
+firmware/hal/       STM32 HAL integration boundary
+tests/              Host-side protocol tests
+docs/               Architecture, protocol, validation, and hardware notes
+pcb/                KiCad design entry point and manufacturing documentation
+.github/workflows/  Continuous integration pipeline
 ```
 
-## Como usar
+## Getting started
 
-1. Crie um projeto STM32CubeIDE para o MCU escolhido.
-2. Habilite FreeRTOS, CAN, I2C, UART e watchdog no `.ioc`.
-3. Copie `firmware/inc` e `firmware/src` para o projeto.
-4. Implemente as funções em `firmware/hal` usando os periféricos gerados, incluindo a leitura de linhas da UART.
-5. Compile, grave a placa e valide seguindo `docs/validation-plan.md`.
+1. Create an STM32CubeIDE project for the target MCU.
+2. Enable FreeRTOS, CAN, I2C, UART, SWD, and an independent watchdog.
+3. Add the files under `firmware/inc` and `firmware/src` to the project.
+4. Implement the functions declared in `firmware/hal/hal_port.h` using STM32Cube HAL.
+5. Configure the pins, clock tree, CAN bitrate, I2C speed, and UART baud rate.
+6. Build, flash, and validate the board using [`docs/validation-plan.md`](docs/validation-plan.md).
 
-O código deste repositório é um núcleo de aplicação portátil; nomes de handles e configuração de pinos dependem do STM32 escolhido.
+The repository intentionally does not claim a specific STM32 part number yet. Selecting the MCU is part of the hardware phase and should be recorded in the schematic, BOM, and release notes.
 
-## Critérios de qualidade
+## Quality and engineering practices
 
-- Interfaces de hardware isoladas da lógica de aplicação;
-- Mensagens CAN com escala, endianness e IDs documentados;
-- Falhas observáveis pela UART e pelo campo de status;
-- Watchdog alimentado somente pela tarefa de supervisão;
-- Testes host-side para serialização e limites de protocolo;
-- Pipeline automatizado para compilação dos testes e `cppcheck`.
+- Hardware dependencies isolated behind interfaces;
+- Explicit fault handling instead of silent failures;
+- Watchdog refreshed only by the health-monitoring task;
+- Versioned and documented CAN payloads;
+- Host tests for protocol constants and serialization;
+- Automated CI for every push and pull request;
+- PCB design review checklist covering power, EMC, CAN termination, ERC, and DRC.
 
 ## Roadmap
 
-- [x] Arquitetura inicial do firmware
-- [x] Protocolo CAN documentado
-- [x] CLI UART e supervisão
-- [ ] Driver de sensor real
-- [ ] Esquemático e PCB final
-- [ ] Testes em bancada com dois nós CAN
-- [ ] Fotos, vídeo e release v1.0
+- [x] Define firmware architecture
+- [x] Document CAN protocol
+- [x] Implement UART diagnostic task
+- [x] Add host-side protocol test
+- [x] Add CI and static-analysis workflow
+- [ ] Select target STM32 and sensor components
+- [ ] Implement STM32 HAL integration
+- [ ] Complete KiCad schematic and PCB layout
+- [ ] Manufacture and assemble the first board
+- [ ] Validate two-node CAN communication on the bench
+- [ ] Publish measurements, photos, and a v1.0 release
 
-## Licença
+## Documentation
 
-Distribuído sob a licença MIT. Consulte [LICENSE](LICENSE).
+- [Software architecture](docs/architecture.md)
+- [CAN protocol](docs/can-protocol.md)
+- [Hardware design guidelines](docs/hardware-design.md)
+- [Validation plan](docs/validation-plan.md)
 
-## Autor
+## License
 
-Projeto desenvolvido para demonstrar competências em sistemas embarcados, firmware e hardware eletrônico.
+This project is licensed under the MIT License. See [`LICENSE`](LICENSE).
+
+## Author
+
+**Joao Vitor Lima** — embedded systems, firmware, electronics, and PCB design.
