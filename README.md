@@ -1,10 +1,12 @@
 # STM32 Industrial Gateway
 
-Projeto de portfólio de um gateway para aquisição de dados e diagnóstico de máquinas.
+Gateway industrial modular para aquisição de dados, diagnóstico e comunicação entre nós embarcados.
 
-## Objetivo
+> Status: arquitetura e firmware de aplicação em desenvolvimento. A camada HAL deve ser ligada ao STM32 escolhido e os resultados de bancada devem ser adicionados às releases.
 
-O dispositivo lê sensores por I2C, publica dados em uma rede CAN e oferece uma CLI de diagnóstico pela UART. O firmware usa FreeRTOS para separar aquisição, comunicação, armazenamento e supervisão.
+## Visão do produto
+
+O dispositivo lê sensores por I2C, publica dados em uma rede CAN e oferece uma CLI de diagnóstico pela UART. A aplicação usa FreeRTOS para separar aquisição, comunicação, supervisão e diagnóstico, com filas entre tarefas e tratamento explícito de falhas.
 
 ## Habilidades demonstradas
 
@@ -16,8 +18,10 @@ O dispositivo lê sensores por I2C, publica dados em uma rede CAN e oferece uma 
 - Watchdog e tratamento de falhas
 - Organização modular de drivers e aplicação
 - Desenvolvimento de esquemático e PCB
+- Testes automatizados da lógica de protocolo
+- Integração contínua com compilação e análise estática
 
-## Arquitetura
+## Arquitetura de software
 
 ```text
 Sensor I2C ──> SensorTask ──> DataQueue ──> CanTask ──> Rede CAN
@@ -25,6 +29,8 @@ Sensor I2C ──> SensorTask ──> DataQueue ──> CanTask ──> Rede CAN
 UART/CLI ───────────────────────────────> CommandTask
                          HealthTask ────> Watchdog + diagnóstico
 ```
+
+As dependências de hardware ficam atrás de `hal_port.h`. Isso permite testar a lógica da aplicação no computador sem fingir que um periférico foi validado em uma placa real.
 
 ## Protocolo CAN
 
@@ -70,6 +76,15 @@ pcb/                      Esquemático, layout, BOM e arquivos de fabricação
 
 O código deste repositório é um núcleo de aplicação portátil; nomes de handles e configuração de pinos dependem do STM32 escolhido.
 
+## Critérios de qualidade
+
+- Interfaces de hardware isoladas da lógica de aplicação;
+- Mensagens CAN com escala, endianness e IDs documentados;
+- Falhas observáveis pela UART e pelo campo de status;
+- Watchdog alimentado somente pela tarefa de supervisão;
+- Testes host-side para serialização e limites de protocolo;
+- Pipeline automatizado para compilação dos testes e `cppcheck`.
+
 ## Roadmap
 
 - [x] Arquitetura inicial do firmware
@@ -79,6 +94,10 @@ O código deste repositório é um núcleo de aplicação portátil; nomes de ha
 - [ ] Esquemático e PCB final
 - [ ] Testes em bancada com dois nós CAN
 - [ ] Fotos, vídeo e release v1.0
+
+## Licença
+
+Distribuído sob a licença MIT. Consulte [LICENSE](LICENSE).
 
 ## Autor
 

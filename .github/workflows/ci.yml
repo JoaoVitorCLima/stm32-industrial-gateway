@@ -1,0 +1,17 @@
+name: Firmware quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build protocol tests
+        run: gcc -std=c11 -Wall -Wextra -Werror -Ifirmware/inc tests/test_protocol.c -o test_protocol
+      - name: Run protocol tests
+        run: ./test_protocol
+      - name: Static analysis
+        run: cppcheck --enable=warning,style,performance,portability --error-exitcode=1 --suppress=missingIncludeSystem firmware

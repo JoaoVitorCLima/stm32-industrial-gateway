@@ -1,0 +1,22 @@
+# STM32CubeIDE / Eclipse
+.settings/
+.project
+.cproject
+Debug/
+Release/
+build/
+*.elf
+*.hex
+*.bin
+*.map
+
+# KiCad generated files
+pcb/gerbers/
+pcb/*-backups/
+pcb/*.kicad_prl
+pcb/*.kicad_pro.lck
+
+# Editor and OS files
+.vscode/
+.DS_Store
+*.swp
