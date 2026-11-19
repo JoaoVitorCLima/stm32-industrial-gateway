@@ -71,7 +71,7 @@ pcb/                      Esquemático, layout, BOM e arquivos de fabricação
 1. Crie um projeto STM32CubeIDE para o MCU escolhido.
 2. Habilite FreeRTOS, CAN, I2C, UART e watchdog no `.ioc`.
 3. Copie `firmware/inc` e `firmware/src` para o projeto.
-4. Implemente as funções em `firmware/hal` usando os periféricos gerados.
+4. Implemente as funções em `firmware/hal` usando os periféricos gerados, incluindo a leitura de linhas da UART.
 5. Compile, grave a placa e valide seguindo `docs/validation-plan.md`.
 
 O código deste repositório é um núcleo de aplicação portátil; nomes de handles e configuração de pinos dependem do STM32 escolhido.
