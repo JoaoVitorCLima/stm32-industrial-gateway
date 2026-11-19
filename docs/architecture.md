@@ -1,24 +1,24 @@
-# Arquitetura do sistema
+# System Architecture
 
-## Fronteiras
+## Boundaries
 
-`firmware/src` contém a lógica de produto. `firmware/hal` é a única camada que deve conhecer HAL/LL, handles gerados pelo STM32Cube e detalhes de pinos. Essa separação facilita testes e migração entre famílias STM32.
+`firmware/src` contains product logic. `firmware/hal` is the only layer that should know about STM32 HAL/LL, generated handles, and pin details. This separation makes the application easier to test and migrate between STM32 families.
 
-## Tarefas e prioridades
+## Tasks and priorities
 
-| Tarefa | Período | Prioridade | Responsabilidade |
+| Task | Period | Priority | Responsibility |
 |---|---:|---:|---|
-| SensorTask | 100 ms | 3 | Aquisição I2C e validação de amostra |
-| CanTask | evento/250 ms | 3 | Serialização e transmissão CAN |
-| CommandTask | evento | 2 | CLI UART e comandos de diagnóstico |
-| HealthTask | 1000 ms | 1 | Watchdog, uptime e status |
+| SensorTask | 100 ms | 3 | I2C acquisition and sample validation |
+| CanTask | event/250 ms | 3 | CAN serialization and transmission |
+| CommandTask | event | 2 | UART CLI and diagnostic commands |
+| HealthTask | 1000 ms | 1 | Watchdog, uptime, and system status |
 
-As filas têm capacidade limitada de propósito. Em sistemas reais, backpressure e perda de amostras devem ser observáveis, nunca silenciosos.
+Queue capacity is intentionally bounded. In a real system, backpressure and sample loss must be observable rather than silently ignored.
 
-## Tratamento de falhas
+## Fault handling
 
-- Falha de sensor seta `SYSTEM_SENSOR_FAULT`;
-- Falha de transmissão seta `SYSTEM_CAN_FAULT`;
-- A HealthTask envia o status e atualiza o watchdog;
-- Um reset por watchdog deve ser registrado na inicialização;
-- Comandos de manutenção não devem bloquear tarefas de tempo real.
+- Sensor failures set `SYSTEM_SENSOR_FAULT`;
+- CAN transmission failures set `SYSTEM_CAN_FAULT`;
+- HealthTask publishes status and refreshes the watchdog;
+- A watchdog reset should be recorded during system startup;
+- Maintenance commands must not block real-time tasks.

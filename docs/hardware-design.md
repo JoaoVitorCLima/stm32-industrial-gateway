@@ -1,21 +1,21 @@
-# Diretrizes de hardware
+# Hardware Design Guidelines
 
-## Blocos da PCB
+## PCB blocks
 
-- MCU STM32 com SWD acessível;
-- transceptor CAN compatível com 3,3 V;
-- terminação CAN selecionável por jumper;
-- regulador 5 V para 3,3 V;
-- proteção ESD nos conectores externos;
-- conector UART de serviço;
-- sensor I2C e pontos de teste para alimentação, CANH e CANL.
+- STM32 MCU with accessible SWD header;
+- 3.3 V-compatible CAN transceiver;
+- selectable CAN termination using a jumper;
+- 5 V to 3.3 V power regulator;
+- ESD protection on external connectors;
+- service UART connector;
+- I2C sensor and test points for power, CANH, and CANL.
 
-## Checklist de revisão
+## Design review checklist
 
-- [ ] desacoplamento próximo a cada pino de alimentação;
-- [ ] retorno de corrente e plano de terra revisados;
-- [ ] pull-ups I2C dimensionados;
-- [ ] terminação CAN presente somente nas extremidades;
-- [ ] test points identificados no silkscreen;
-- [ ] ERC e DRC sem erros não justificados;
-- [ ] BOM com fabricante, part number e substituto aprovado.
+- [ ] Decoupling capacitors placed close to each power pin;
+- [ ] Current return paths and ground plane reviewed;
+- [ ] I2C pull-up values calculated;
+- [ ] CAN termination fitted only at network endpoints;
+- [ ] Test points identified on the silkscreen;
+- [ ] ERC and DRC completed with no unjustified errors;
+- [ ] BOM includes manufacturer, part number, and approved alternative.

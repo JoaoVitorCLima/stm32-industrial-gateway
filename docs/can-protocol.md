@@ -1,30 +1,30 @@
-# Protocolo CAN
+# CAN Protocol
 
-Formato little-endian para os campos numéricos.
+All numeric fields use little-endian byte order.
 
-## `0x180` — sensor sample
+## `0x180` — Sensor sample
 
-| Byte | Campo | Tipo | Escala |
+| Byte | Field | Type | Scale |
 |---:|---|---|---|
-| 0–1 | temperatura | `int16_t` | centésimos de °C |
-| 2–3 | alimentação | `uint16_t` | mV |
-| 4–5 | contador | `uint16_t` | incremento por amostra |
-| 6 | versão do payload | `uint8_t` | atualmente `1` |
-| 7 | reservado | `uint8_t` | `0` |
+| 0–1 | temperature | `int16_t` | centi-degrees Celsius |
+| 2–3 | supply voltage | `uint16_t` | mV |
+| 4–5 | sample counter | `uint16_t` | incremented per sample |
+| 6 | payload version | `uint8_t` | currently `1` |
+| 7 | reserved | `uint8_t` | `0` |
 
-## `0x181` — status
+## `0x181` — System status
 
-| Byte | Campo | Tipo |
+| Byte | Field | Type |
 |---:|---|---|
-| 0–3 | bitmap de erros | `uint32_t` |
+| 0–3 | fault bitmap | `uint32_t` |
 | 4–7 | uptime | `uint32_t`, ms |
 
-## `0x200` — comando
+## `0x200` — Command
 
-| Byte | Campo |
+| Byte | Field |
 |---:|---|
 | 0 | opcode |
-| 1–4 | argumento little-endian |
-| 5–7 | reservado |
+| 1–4 | little-endian argument |
+| 5–7 | reserved |
 
-Qualquer alteração de payload deve gerar uma nova versão e atualizar este documento.
+Any payload change must increment the payload version and update this document.

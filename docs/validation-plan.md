@@ -1,22 +1,22 @@
-# Plano de validação
+# Validation Plan
 
 ## Firmware
 
-- Confirmar que a task de aquisição executa a cada 100 ms.
-- Desconectar o sensor e verificar `SYSTEM_SENSOR_FAULT`.
-- Interromper o barramento CAN e verificar `SYSTEM_CAN_FAULT`.
-- Confirmar que o watchdog reinicia o sistema quando a aplicação trava.
-- Validar que a fila não perde o valor mais recente do sensor.
+- Confirm that the acquisition task runs every 100 ms.
+- Disconnect the sensor and verify `SYSTEM_SENSOR_FAULT`.
+- Interrupt the CAN bus and verify `SYSTEM_CAN_FAULT`.
+- Confirm that the watchdog resets the system when the application is stalled.
+- Verify that the queue preserves the most recent sensor sample.
 
-## Comunicação
+## Communication
 
-- Verificar frames `0x180` com um analisador CAN.
-- Validar endianness, escala e limites dos campos.
-- Enviar comandos `0x200` e conferir resposta pela UART.
+- Verify `0x180` frames with a CAN analyzer.
+- Validate field endianness, scaling, and limits.
+- Send `0x200` commands and verify the UART response.
 
 ## Hardware
 
-- Medir alimentação de 3,3 V sob carga.
-- Verificar terminação de 120 ohms nas extremidades da rede CAN.
-- Testar proteção contra inversão de polaridade e ESD.
-- Registrar fotos da PCB montada e do teste com dois nós.
+- Measure the 3.3 V rail under load.
+- Verify 120 ohm termination at the CAN network endpoints.
+- Test reverse-polarity and ESD protection.
+- Record assembly photos and a two-node CAN test video.

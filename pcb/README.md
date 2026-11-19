@@ -1,10 +1,10 @@
-# PCB
+# PCB Design
 
-Esta pasta receberá os arquivos do KiCad:
+This directory will contain the KiCad design files:
 
-- `gateway.kicad_sch`: esquemático;
-- `gateway.kicad_pcb`: layout;
-- `bom.csv`: lista de materiais;
-- `gerbers/`: arquivos de fabricação.
+- `gateway.kicad_sch`: schematic;
+- `gateway.kicad_pcb`: board layout;
+- `bom.csv`: bill of materials;
+- `gerbers/`: manufacturing outputs.
 
-O projeto de hardware deve seguir o checklist em `docs/hardware-design.md`.
+The hardware design must follow the review checklist in [`docs/hardware-design.md`](../docs/hardware-design.md).
